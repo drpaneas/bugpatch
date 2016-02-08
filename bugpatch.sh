@@ -302,40 +302,58 @@ exitstatus () {
   fi
 }
 
+tmpstatus () {
+  if [ $? -eq 0 ]; then
+    exit 0
+  fi
+}
+
 
 if [ "$number_needed" -lt "$number_not_needed" ]; then
   if [ "$number_needed" -lt "$number_installed" ]; then
     search_needed
+    tmpstatus
     if [ "$number_not_needed" -lt "$number_installed" ]; then
       search_not_needed
+      tmpstatus
       search_installed
       exitstatus
     else
       search_installed
+      tmpstatus
       search_not_needed
       exitstatus
     fi
   else
     search_installed
+    tmpstatus
     search_needed
+    tmpstatus
     search_not_needed
       exitstatus
   fi
 else
   if [ "$number_not_needed" -lt "$number_installed" ]; then
     search_not_needed
+    tmpstatus
     if [ "$number_installed" -lt "$number_needed" ]; then
       search_installed
+      tmpstatus
       search_needed
+      tmpstatus
       exitstatus
     else
       search_needed
+      tmpstatus
       search_installed
+      tmpstatus
       exitstatus
     fi
   else
     search_installed
+    tmpstatus
     search_not_needed
+    tmpstatus
     search_needed
     exitstatus
   fi
