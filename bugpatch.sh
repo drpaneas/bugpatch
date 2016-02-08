@@ -6,16 +6,15 @@ bug=$1
 #       implement a loading bar while waiting...
 
 # --- COLOR DEFINITIONS --- #
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-blue=`tput setaf 4`
-pink=`tput setaf 5`
-bold=`tput bold`
-under_1=`tput smul`
-under_0=`tput rmul`
-blink=`tput blink`
-reset=`tput sgr0`
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+pink=$(tput setaf 5)
+bold=$(tput bold)
+under_1=$(tput smul)
+under_0=$(tput rmul)
+reset=$(tput sgr0)
 # ------------------------ #
 
 pgrep zypper 1> /dev/null
@@ -35,7 +34,7 @@ search_needed() {
   for patch in $(zypper patches 2>/dev/null | tail -n +5 | grep '|[[:space:]]\+Needed' | awk -F '|' '{ print $2 }')
   do
       # If you found a patch with this bug number:
-      zypper patch-info $patch | egrep $bug > /dev/null
+      zypper patch-info "$patch" | egrep "$bug" > /dev/null
       if [ $? -eq 0 ]
       then
         echo -e "\n  --> ${blue}Patch${reset} ${green}found:${reset} ${bold}'$patch'${reset}"
@@ -44,7 +43,7 @@ search_needed() {
         # print generic info about the patch
         echo "${bold}$(zypper patches | grep Category)${reset}"
         echo "------------------------------------------------------------------------------------------------"
-        zypper patches | grep $patch
+        zypper patches | grep "$patch"
         echo
 
         # Find which patch packages are installed in your system (if any)
@@ -53,12 +52,12 @@ search_needed() {
         echo "-----------------------------------"
 
         # Search if each pkg is installed
-        for pkg in $(zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
+        for pkg in $(zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
         do
-          rpm -q $pkg > /dev/null
+          rpm -q "$pkg" > /dev/null
           if [ $? -eq 0 ]
           then
-            echo -e "$(rpm -q $pkg | sed -e 's/.x[0-9]*_[0-9]*/ /')\t${red}[installed]${reset}"
+            echo -e "$(rpm -q "$pkg" | sed -e 's/.x[0-9]*_[0-9]*/ /')\t${red}[installed]${reset}"
           else
             echo -e "$pkg\t${yellow}[not installed]${reset}"  # pkg not installed, doesn't mean you're OK -- unless ALL of these pkgs are 'not installed'
           fi
@@ -68,7 +67,7 @@ search_needed() {
         echo
         echo "${bold}Patch provides the following fixed packages:${reset}"
         echo "---------------------------------------------"
-        zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | sed -e 's/.x[0-9]*_[0-9]*\ < /-/'
+        zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | sed -e 's/.x[0-9]*_[0-9]*\ < /-/'
         echo
 
         echo "${bold}System status:${reset}"
@@ -107,7 +106,7 @@ search_not_needed() {
   for patch in $(zypper patches 2>/dev/null | tail -n +5 | grep '|[[:space:]]\+Not Needed' | awk -F '|' '{ print $2 }')
   do
       # If you found a patch with this bug number:
-      zypper patch-info $patch | egrep $bug > /dev/null
+      zypper patch-info "$patch" | egrep "$bug" > /dev/null
       if [ $? -eq 0 ]
       then
         echo -e "\n  --> ${blue}Patch${reset} ${green}found:${reset} ${bold}'$patch'${reset}"
@@ -116,7 +115,7 @@ search_not_needed() {
         # print generic info about the patch
         echo "${bold}$(zypper patches | grep Category)${reset}"
         echo "------------------------------------------------------------------------------------------------"
-        zypper patches | grep $patch
+        zypper patches | grep "$patch"
         echo
 
         # Find which patch packages are installed in your system (if any)
@@ -125,12 +124,12 @@ search_not_needed() {
         echo "-----------------------------------"
 
         # Search if each pkg is installed
-        for pkg in $(zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
+        for pkg in $(zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
         do
-          rpm -q $pkg > /dev/null
+          rpm -q "$pkg" > /dev/null
           if [ $? -eq 0 ]
           then
-            echo -e "$(rpm -q $pkg | sed -e 's/.x[0-9]*_[0-9]*/ /')\t${red}[installed]${reset}"
+            echo -e "$(rpm -q "$pkg" | sed -e 's/.x[0-9]*_[0-9]*/ /')\t${red}[installed]${reset}"
           else
             echo -e "$pkg\t${yellow}[not installed]${reset}"  # pkg not installed, doesn't mean you're OK -- unless ALL of these pkgs are 'not installed'
           fi
@@ -140,7 +139,7 @@ search_not_needed() {
         echo
         echo "${bold}Patch provides the following fixed packages:${reset}"
         echo "---------------------------------------------"
-        zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | sed -e 's/.x[0-9]*_[0-9]*\ < /-/'
+        zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | sed -e 's/.x[0-9]*_[0-9]*\ < /-/'
         echo
 
         echo "${bold}System status:${reset}"
@@ -177,7 +176,7 @@ search_installed () {
   # Search into Installed Patches using zypper patches command to get the name of the patch
   for patch in $(zypper patches 2>/dev/null | grep '|[[:space:]]\+Installed' | awk -F '|' '{ print $2 }')
   do
-      zypper patch-info $patch | egrep $bug > /dev/null   # Check if patch is installed
+      zypper patch-info "$patch" | egrep "$bug" > /dev/null   # Check if patch is installed
       if [ $? -eq 0 ]
       then
 
@@ -190,13 +189,13 @@ search_installed () {
           echo      "--------------------------------------"
 
           # Find the pkgs related to this patch
-          for pkg in $(zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | sed -e 's/.x[0-9]*_[0-9]*\ < /-/')
+          for pkg in $(zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | sed -e 's/.x[0-9]*_[0-9]*\ < /-/')
           do
               # Chech if each of these pkgs is installed
-              rpm -q $pkg > /dev/null
+              rpm -q "$pkg" > /dev/null
               if [ $? -eq 0 ]
               then
-                  echo -e "$(rpm -q $pkg | sed -e 's/.x[0-9]*_[0-9]*/ /')\t${green}[installed]${reset}"
+                  echo -e "$(rpm -q "$pkg" | sed -e 's/.x[0-9]*_[0-9]*/ /')\t${green}[installed]${reset}"
               else
                   echo -e "$pkg\t${yellow}[not installed]${reset}"
               fi
@@ -207,13 +206,13 @@ search_installed () {
           echo "${bold}Fixed (patched) packages installed:${reset}"
           result=0
           echo      "-----------------------------------"
-          for pkg in $(zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
+          for pkg in $(zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
           do
             # Check if we have the exact patched version installed
-            rpm -q $pkg > /dev/null
+            rpm -q "$pkg" > /dev/null
             if [ $? -eq 0 ]
             then
-              echo "${green}$(rpm -q $pkg | sed -e 's/.x[0-9]*_[0-9]*/ /')${reset}"
+              echo "${green}$(rpm -q "$pkg" | sed -e 's/.x[0-9]*_[0-9]*/ /')${reset}"
             fi
           done
 
@@ -221,14 +220,14 @@ search_installed () {
           echo
           echo "${bold}How to Downgrade (for whatever reason)${reset}"
           echo "--------------------------------------"
-          for pkg in $(zypper patch-info $patch | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
+          for pkg in $(zypper patch-info "$patch" | sed -n '/Conflicts/,/END/p' | grep -v 'Conflicts' | grep -v 'srcpackage' | sed -e 's/^[[:space:]]*//' | grep -v 'i586' | awk -F '<' '{print $1}' | sed -e 's/.x[0-9]*_[0-9]*/ /')
           do
-            rpm -q $pkg > /dev/null # if it's installed
+            rpm -q "$pkg" > /dev/null # if it's installed
 
             if [ $? -eq 0 ]
             then
                     # Find the previous version of the pkg
-                    previous_pkg=$(zypper se -s $pkg | grep 'v ' | head -1 | awk -F '|' '{print $2 $4}' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | tr -s ' ' | sed -e 's/\s/-/g' )
+                    previous_pkg=$(zypper se -s "$pkg" | grep 'v ' | head -1 | awk -F '|' '{print $2 $4}' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | tr -s ' ' | sed -e 's/\s/-/g' )
                     echo "Type: ${green}zypper in --oldpackage $previous_pkg${reset}"
             fi
           done
