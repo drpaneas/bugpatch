@@ -86,6 +86,11 @@ search_needed() {
       fi
   done
 
+  check_if_zero=$(zypper patches 2>/dev/null | tail -n +5 | grep '|[[:space:]]\+Needed' | awk -F '|' '{ print $2 }' | wc -l)
+  if [[ "$check_if_zero" -eq 0 ]]; then
+    result=1
+  fi
+
   if [ "$result" -eq 1 ]; then
     echo -e "\n  --> ${blue}Patch${reset} ${red}not found${reset}\n\n"
   fi
